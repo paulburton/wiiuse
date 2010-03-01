@@ -48,6 +48,7 @@ INCLUDES = -I.
 # Generate a list of object files
 #
 OBJS = \
+	$(OBJ_DIR)/balance_board.o \
 	$(OBJ_DIR)/classic.o \
 	$(OBJ_DIR)/dynamics.o \
 	$(OBJ_DIR)/events.o \

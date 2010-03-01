@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #ifndef WIN32
 	#include <unistd.h>
@@ -56,6 +57,7 @@
  *	event occurs on the specified wiimote.
  */
 void handle_event(struct wiimote_t* wm) {
+	if (wm->exp.type != EXP_BALANCE_BOARD)
 	printf("\n\n--- EVENT [id %i] ---\n", wm->unid);
 
 	/* if a button is pressed, report it */
@@ -181,6 +183,32 @@ void handle_event(struct wiimote_t* wm) {
 		printf("Guitar whammy bar:          %f\n", gh3->whammy_bar);
 		printf("Guitar joystick angle:      %f\n", gh3->js.ang);
 		printf("Guitar joystick magnitude:  %f\n", gh3->js.mag);
+	} else if (wm->exp.type == EXP_BALANCE_BOARD) {
+		static int first = 1;
+		const struct balance_board_t *bb = &wm->exp.bb;
+		float v = bb->tr + bb->tl + bb->br + bb->bl;
+		float x = ((bb->tr + bb->br) - (bb->tl + bb->bl));
+		float y = ((bb->tl + bb->tr) - (bb->bl + bb->br));
+		float a = atan2f(y, x) / M_PI * 180.0;
+
+		/*
+		 * Board orientation:
+		 * +---------------------+
+		 * | tl               tr |
+		 * |        y            |
+		 * |        ^            |
+		 * |        |            |
+		 * |        +----> x     |
+		 * | bl               br |
+		 * +---------vvv---------+
+		 *           Button-A (power)
+		 */
+		if(first) {
+			printf("  tr    br    tl    bl  |   x     y    |v|   ang\n");
+			first = 0;
+		}
+		printf("% 5.1f % 5.1f % 5.1f % 5.1f | % 5.1f %5.1f % 5.1f % 6.1f\r", bb->tr, bb->br, bb->tl, bb->bl, x, y, v, a);
+		fflush(stdout);
 	}
 }
 
@@ -407,6 +435,10 @@ int main(int argc, char** argv) {
 						printf("Classic controller inserted.\n");
 						break;
 
+					case WIIUSE_BALANCE_BOARD_CTRL_INSERTED:
+						printf("Balance board controller inserted.\n");
+						break;
+
 					case WIIUSE_GUITAR_HERO_3_CTRL_INSERTED:
 						/* some expansion was inserted */
 						handle_ctrl_status(wiimotes[i]);
@@ -416,6 +448,7 @@ int main(int argc, char** argv) {
 					case WIIUSE_NUNCHUK_REMOVED:
 					case WIIUSE_CLASSIC_CTRL_REMOVED:
 					case WIIUSE_GUITAR_HERO_3_CTRL_REMOVED:
+					case WIIUSE_BALANCE_BOARD_CTRL_REMOVED:
 						/* some expansion was removed */
 						handle_ctrl_status(wiimotes[i]);
 						printf("An expansion was removed.\n");

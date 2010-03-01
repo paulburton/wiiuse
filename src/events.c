@@ -56,6 +56,7 @@
 #include "nunchuk.h"
 #include "classic.h"
 #include "guitar_hero_3.h"
+#include "balance_board.h"
 #include "events.h"
 
 static void idle_cycle(struct wiimote_t* wm);
@@ -611,6 +612,9 @@ static void handle_expansion(struct wiimote_t* wm, byte* msg) {
 		case EXP_GUITAR_HERO_3:
 			guitar_hero_3_event(&wm->exp.gh3, msg);
 			break;
+		case EXP_BALANCE_BOARD:
+			balance_board_event(&wm->exp.bb, msg);
+			break;
 		default:
 			break;
 	}
@@ -680,6 +684,12 @@ void handshake_expansion(struct wiimote_t* wm, byte* data, unsigned short len) {
 				wm->event = WIIUSE_GUITAR_HERO_3_CTRL_INSERTED;
 			break;
 		}
+		case EXP_ID_CODE_BALANCE_BOARD:
+		{
+			if (balance_board_handshake(wm, &wm->exp.bb, data, len))
+				wm->event = WIIUSE_BALANCE_BOARD_CTRL_INSERTED;
+			break;
+		}
 		default:
 		{
 			WIIUSE_WARNING("Unknown expansion type. Code: 0x%x", id);
@@ -719,6 +729,10 @@ void disable_expansion(struct wiimote_t* wm) {
 		case EXP_GUITAR_HERO_3:
 			guitar_hero_3_disconnected(&wm->exp.gh3);
 			wm->event = WIIUSE_GUITAR_HERO_3_CTRL_REMOVED;
+			break;
+		case EXP_BALANCE_BOARD:
+			balance_board_disconnected(&wm->exp.bb);
+			wm->event = WIIUSE_BALANCE_BOARD_CTRL_REMOVED;
 			break;
 		default:
 			break;
@@ -770,6 +784,9 @@ static void save_state(struct wiimote_t* wm) {
 			wm->lstate.exp_r_shoulder = wm->exp.gh3.whammy_bar;
 			wm->lstate.exp_btns = wm->exp.gh3.btns;
 			break;
+
+		case EXP_BALANCE_BOARD:
+			wm->lstate.exp_bb_raw = wm->exp.bb.raw;
 
 		case EXP_NONE:
 			break;
@@ -864,6 +881,14 @@ static int state_changed(struct wiimote_t* wm) {
 			STATE_CHANGED(wm->lstate.exp_ljs_mag, wm->exp.gh3.js.mag);
 			STATE_CHANGED(wm->lstate.exp_r_shoulder, wm->exp.gh3.whammy_bar);
 			STATE_CHANGED(wm->lstate.exp_btns, wm->exp.gh3.btns);
+			break;
+		}
+		case EXP_BALANCE_BOARD:
+		{
+			STATE_CHANGED(wm->lstate.exp_bb_raw.tr, wm->exp.bb.raw.tr);
+			STATE_CHANGED(wm->lstate.exp_bb_raw.br, wm->exp.bb.raw.br);
+			STATE_CHANGED(wm->lstate.exp_bb_raw.tl, wm->exp.bb.raw.tl);
+			STATE_CHANGED(wm->lstate.exp_bb_raw.bl, wm->exp.bb.raw.bl);
 			break;
 		}
 		case EXP_NONE:
