@@ -89,9 +89,9 @@ int balance_board_handshake(struct wiimote_t* wm, struct balance_board_t* bb, by
 	bb->cal_34.bl = (data[0x1a] << 8) + data[0x1b];
 	/* Unknown data at 0xa4003c..3f (mine says: 0x4c 0x81 0x59 0x95) */
 
-	WIIUSE_DEBUG(stderr, "calibration  0: %04x %04x %04x %04x\n", bb->cal_0.tr, bb->cal_0.br, bb->cal_0.tl, bb->cal_0.br);
-	WIIUSE_DEBUG(stderr, "calibration 17: %04x %04x %04x %04x\n", bb->cal_17.tr, bb->cal_17.br, bb->cal_17.tl, bb->cal_17.br);
-	WIIUSE_DEBUG(stderr, "calibration 34: %04x %04x %04x %04x\n", bb->cal_34.tr, bb->cal_34.br, bb->cal_34.tl, bb->cal_34.br);
+	WIIUSE_DEBUG("calibration  0: %04x %04x %04x %04x\n", bb->cal_0.tr, bb->cal_0.br, bb->cal_0.tl, bb->cal_0.br);
+	WIIUSE_DEBUG("calibration 17: %04x %04x %04x %04x\n", bb->cal_17.tr, bb->cal_17.br, bb->cal_17.tl, bb->cal_17.br);
+	WIIUSE_DEBUG("calibration 34: %04x %04x %04x %04x\n", bb->cal_34.tr, bb->cal_34.br, bb->cal_34.tl, bb->cal_34.br);
 
 	/* handshake done */
 	wm->exp.type = EXP_BALANCE_BOARD;
