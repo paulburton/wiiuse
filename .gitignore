@@ -1,0 +1,6 @@
+example/debug-*
+example/release-*
+example-sdl/debug-*
+example-sdl/release-*
+src/debug-*
+src/release-*
